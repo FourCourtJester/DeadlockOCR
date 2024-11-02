@@ -6,6 +6,5 @@ services:
     restart: unless-stopped
     volumes:
       - ..:/workspace
-      - ~/.ssh:/home/node/.ssh
     ports:
       - "5000:5000"

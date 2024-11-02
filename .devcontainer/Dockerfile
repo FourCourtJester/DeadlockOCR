@@ -7,6 +7,7 @@ USER $USER
 # Install dependencies
 RUN apt-get update && apt-get install -y \
   tesseract-ocr \
+  tesseract-ocr-fra \
   libopencv-dev \
   python3-opencv \
   # Install additional utilities
