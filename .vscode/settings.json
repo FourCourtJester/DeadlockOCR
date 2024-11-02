@@ -1,0 +1,15 @@
+{
+  // "editor.defaultFormatter": "dbaeumer.vscode-eslint", // ESLint
+  "editor.detectIndentation": false,
+  "eslint.alwaysShowStatus": true,
+  "eslint.enable": true,
+  "eslint.format.enable": true,
+  "editor.formatOnSave": true,
+  "editor.insertSpaces": true,
+  "eslint.lintTask.enable": true,
+  "editor.tabSize": 2,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  "git.enableSmartCommit": true,
+  "json.format.enable": true,
+}
