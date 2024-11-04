@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 
 from routes.teams_souls import endpoint as teams_souls
 from routes.player_names import endpoint as player_names
+from routes.camera import endpoint as camera
 
 app = Flask(__name__)
 
@@ -17,6 +18,14 @@ def route_teams_souls():
 def route_player_names():
     try:
       return player_names(request)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500  # Return the error message
+
+@app.route('/deadlock/ocr/camera', methods=['POST'])
+def route_camera():
+    try:
+      return camera(request)
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500  # Return the error message

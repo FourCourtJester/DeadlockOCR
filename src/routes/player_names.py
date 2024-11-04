@@ -1,5 +1,5 @@
 from flask import jsonify
-from utils import crop_image, extract_text_from_image, get_file
+from utils import crop_image_grayscale as crop_image, extract_text_from_image, get_file
 
 # import cv2
 

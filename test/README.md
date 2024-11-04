@@ -12,6 +12,7 @@ curl -X POST http://localhost:5000/deadlock/ocr/teams/souls -F 'image=@test/scre
 {
   "souls": {
     "amber": 68,
+    "delta": 8,
     "sapphire": 60
   }
 }
@@ -25,6 +26,7 @@ curl -X POST http://localhost:5000/deadlock/ocr/teams/souls -F 'image=@test/hund
 {
   "souls": {
     "amber": 232,
+    "delta": -15,
     "sapphire": 247
   }
 }```
@@ -109,5 +111,39 @@ curl -X POST http://localhost:5000/deadlock/ocr/teams/players -F 'image=@test/pl
       "TOM CRUISE OF DEADLOCK"
     ]
   }
+}
+```
+
+### Upload a screenshot for Selected Player
+
+```bash
+curl -X POST http://localhost:5000/deadlock/ocr/camera -F 'image=@test/hundredk_souls.jpg'
+
+curl -X POST http://localhost:5000/deadlock/ocr/camera -F 'image=@test/player_names_2lines.jpg'
+
+curl -X POST http://localhost:5000/deadlock/ocr/camera -F 'image=@test/screenshot.jpg'
+```
+
+```json
+{
+  "camera": 11, // hundredk_souls.jpg
+  "player": 5,
+  "team": "Sapphire"
+}
+```
+
+```json
+{
+  "camera": 4, // player_names_2lines.jpg
+  "player": 4,
+  "team": "Amber"
+}
+```
+
+```json
+{
+  "camera": 9, // screenshot.jpg
+  "player": 3,
+  "team": "Sapphire"
 }
 ```
