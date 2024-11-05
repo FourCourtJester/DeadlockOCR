@@ -1,5 +1,6 @@
 from flask import jsonify
-from utils import crop_image, extract_text_from_image, get_file
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from utils import crop_image, get_file
 
 import numpy
 # import cv2
@@ -8,10 +9,13 @@ IMAGE_NAME = 'image'
 TEAM_NAMES = ['Amber', 'Sapphire']
 TEAM_SIZE = 6
 
+GROUP_AMT = 2
+PLAYERS_PER_GROUP = 3
+
+HIGHLIGHT_SUCCESS = 34
 HIGHLIGHT = {
    "WHITE": [numpy.array([188,175,159]), numpy.array([240,225,202])]
 }
-HIGHLIGHT_SUCCESS = 34
 
 BOUNDING_BOX = {
    "HEIGHT": 48,
@@ -56,6 +60,16 @@ def detect_color_percentage(image, bounds):
     percentage = (color_pixels / total_pixels) * 100
     return percentage
 
+def get_camera(image, team, player):
+  """Check if this player is the current camera"""
+  # Crop to the areas with the player names
+  hero_image = crop_image(image, get_coords(team.upper(), player))
+
+  # Get the player name
+  if detect_color_percentage(hero_image, HIGHLIGHT["WHITE"]) >= HIGHLIGHT_SUCCESS:
+      return player
+  return None
+
 def endpoint(request):
   # Check if an image file was sent in the request
   if IMAGE_NAME not in request.files:
@@ -74,30 +88,26 @@ def endpoint(request):
     "player": None,
   }
 
-  for j, team in enumerate(TEAM_NAMES):
-    for i in range(TEAM_SIZE):
-      # print("Processing team: {team}, player index: {i}")
+  with ThreadPoolExecutor(max_workers=3) as executor:
+    for team_index, team in enumerate(TEAM_NAMES):
+      for group_index in range(GROUP_AMT):
+        # Submit all player checks in the group at once
+        futures = [
+          executor.submit(get_camera, image, team, (group_index * PLAYERS_PER_GROUP) + player_index)
+          for player_index in range(PLAYERS_PER_GROUP)
+        ]
 
-      # Crop to the areas with the player names
-      hero_image = crop_image(image, get_coords(team.upper(), i))
+        for future in as_completed(futures):
+          camera = future.result()
 
-      # DEBUG: save files for visual inspection
-      # cv2.imwrite("".join(["./test/outputs/", team, str(i), request.files['image'].filename]), hero_image)
+          # If a player is found, map player to the appropriate slot and return
+          if camera is not None:
+            player_slot = (team_index * TEAM_SIZE) + camera
 
-      # Get the player name
-      is_selected = detect_color_percentage(hero_image, HIGHLIGHT["WHITE"])
+            return jsonify({
+              "camera": player_slot,
+              "team": team,
+              "player": camera
+            })
 
-      # print("Color percentage:", team, i, is_selected)
-
-      # Save the text
-      if is_selected >= HIGHLIGHT_SUCCESS:
-        result["camera"] = (j * TEAM_SIZE) + i
-        result["team"] = team
-        result["player"] = i
-        break
-    else:
-       continue
-    break
-
-  # Return the extracted soul totals as JSON
   return jsonify(result)
