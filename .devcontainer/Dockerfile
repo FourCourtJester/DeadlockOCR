@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
   && apt-get clean
 
 # Install Python packages (move to requirements.txt if you want more control)
-RUN pip install flask pytesseract opencv-python-headless numpy
+RUN pip install flask flask-cors pytesseract opencv-python-headless numpy
 
 # Create app directory
 WORKDIR /workspace

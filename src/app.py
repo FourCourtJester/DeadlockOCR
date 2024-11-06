@@ -1,4 +1,5 @@
 from flask import Flask, copy_current_request_context, jsonify, request
+from flask_cors import CORS
 from concurrent.futures import ThreadPoolExecutor
 
 from routes.teams_souls import endpoint as teams_souls
@@ -6,6 +7,8 @@ from routes.player_names import endpoint as player_names
 from routes.camera import endpoint as camera
 
 app = Flask(__name__)
+CORS(app, origins=["http://localhost:3000"])
+
 executor = ThreadPoolExecutor(max_workers=5)
 
 def endpoint_with_context(func, *args, **kwargs):
