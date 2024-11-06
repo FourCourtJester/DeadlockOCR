@@ -1,13 +1,19 @@
+from datetime import datetime
 from flask import jsonify
 from utils import crop_image_grayscale as crop_image, extract_text_from_image, get_file
 
 IMAGE_NAME = 'image'
 TEAM_NAMES = ['Amber', 'Sapphire']
+PROBLEM_TEXT = ['i', 'l', 't', 'I']
 
-AMBER_SOUL_COORDS = (885, 0, 885 + 35, 30)  # Based from 1920x1080
-SAPPHIRE_SOUL_COORDS = (1015, 0, 1015 + 35, 30)  # (x, y, x2, y2)
+AMBER_SOUL_COORDS = (889, 0, 889 + 31, 30)  # Based from 1920x1080
+SAPPHIRE_SOUL_COORDS = (1019, 0, 1019 + 31, 30)  # (x, y, x2, y2)
 
-TESSERACT_CONFIG = '--psm 7 outputbase digits' # psm 7 assumes a single line of text
+# Might be able to use this after we train the font
+# TESSERACT_CONFIG = '--psm 7 outputbase digits' # psm 7 assumes a single line of text
+
+TESSERACT_CONFIG = '--psm 7' # psm 7 assumes a single line of text
+
 
 def endpoint(request):
   # Check if an image file was sent in the request
@@ -23,11 +29,18 @@ def endpoint(request):
 
   # Crop to the areas with the soul totals and compute
   amber_soul_image = crop_image(image, AMBER_SOUL_COORDS)
-  amber_souls = extract_text_from_image(amber_soul_image, TESSERACT_CONFIG)
-  amber_souls_num = int(amber_souls) if amber_souls.isdigit() else None
+  amber_souls = extract_text_from_image(amber_soul_image, TESSERACT_CONFIG)[:-1]
 
   sapphire_soul_image = crop_image(image, SAPPHIRE_SOUL_COORDS)
-  sapphire_souls = extract_text_from_image(sapphire_soul_image, TESSERACT_CONFIG)
+  sapphire_souls = extract_text_from_image(sapphire_soul_image, TESSERACT_CONFIG)[:-1]
+
+  # -- Text replacement because of font
+  for char in PROBLEM_TEXT:
+     amber_souls = amber_souls.replace(char, '1')
+     sapphire_souls = sapphire_souls.replace(char, '1')
+  # -- Remove if we revert to outputbase digits
+
+  amber_souls_num = int(amber_souls) if amber_souls.isdigit() else None
   sapphire_souls_num = int(sapphire_souls) if sapphire_souls.isdigit() else None
 
   # Return the extracted soul totals as JSON
