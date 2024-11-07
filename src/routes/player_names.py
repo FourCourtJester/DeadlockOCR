@@ -12,21 +12,21 @@ GROUP_AMT = 2
 PLAYERS_PER_GROUP = 3
 
 BOUNDING_BOX = {
-   "HEIGHT": 24,
-   "WIDTH": 85
+  "HEIGHT": 24,
+  "WIDTH": 85
 }
 
 PLAYERS = {
-   TEAM_NAMES[0].upper(): {
-      "START": (312, 120),
-      "DELTAX": BOUNDING_BOX["WIDTH"] + 5,
-      "DELTAY": 0,
-   },
-   TEAM_NAMES[1].upper(): {
-      "START": (1052, 120),
-      "DELTAX": BOUNDING_BOX["WIDTH"] + 5,
-      "DELTAY": 0,
-   }
+  TEAM_NAMES[0].upper(): {
+    "START": (312, 120),
+    "DELTAX": BOUNDING_BOX["WIDTH"] + 5,
+    "DELTAY": 0,
+  },
+  TEAM_NAMES[1].upper(): {
+    "START": (1052, 120),
+    "DELTAX": BOUNDING_BOX["WIDTH"] + 5,
+    "DELTAY": 0,
+  }
 }
 
 TESSERACT_CONFIG = '--oem 3 --psm 6 -l eng+fra' # psm 6 can handle multiple lines
@@ -52,13 +52,14 @@ def get_player_name(image, team, player):
     "player": player
   }
 
-def endpoint(request):
-  # Check if an image file was sent in the request
-  if IMAGE_NAME not in request.files:
+def endpoint(request, image=None):
+  if image == None:
+    # Check if an image file was sent in the request
+    if IMAGE_NAME not in request.files:
       return jsonify({"error": "No image provided"}), 400
 
-  image = get_file(IMAGE_NAME, request)
-  image.load()
+    image = get_file(IMAGE_NAME, request)
+    image.load()
 
   # Ensure an actual file was uploaded
   if image == None:
@@ -86,5 +87,8 @@ def endpoint(request):
           # Save the text
           result['players'][team.lower()][player] = name.replace('\n', ' ') if name else None
 
+  # Recycle
+  image.close()
+
   # Return the extracted soul totals as JSON
-  return jsonify(result)
+  return result

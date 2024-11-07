@@ -14,25 +14,25 @@ PLAYERS_PER_GROUP = 3
 
 HIGHLIGHT_SUCCESS = 34
 HIGHLIGHT = {
-   "WHITE": [numpy.array([188,175,159]), numpy.array([240,225,202])]
+  "WHITE": [numpy.array([188,175,159]), numpy.array([240,225,202])]
 }
 
 BOUNDING_BOX = {
-   "HEIGHT": 48,
-   "WIDTH": 85
+  "HEIGHT": 48,
+  "WIDTH": 85
 }
 
 PLAYERS = {
-   TEAM_NAMES[0].upper(): {
-      "START": (312, 0),
-      "DELTAX": BOUNDING_BOX["WIDTH"] + 5,
-      "DELTAY": 0,
-   },
-   TEAM_NAMES[1].upper(): {
-      "START": (1052, 0),
-      "DELTAX": BOUNDING_BOX["WIDTH"] + 5,
-      "DELTAY": 0,
-   }
+  TEAM_NAMES[0].upper(): {
+    "START": (312, 0),
+    "DELTAX": BOUNDING_BOX["WIDTH"] + 5,
+    "DELTAY": 0,
+  },
+  TEAM_NAMES[1].upper(): {
+    "START": (1052, 0),
+    "DELTAX": BOUNDING_BOX["WIDTH"] + 5,
+    "DELTAY": 0,
+  }
 }
 
 def get_coords(team, i):
@@ -67,16 +67,17 @@ def get_camera(image, team, player):
 
   # Get the player name
   if detect_color_percentage(hero_image, HIGHLIGHT["WHITE"]) >= HIGHLIGHT_SUCCESS:
-      return player
+    return player
   return None
 
-def endpoint(request):
-  # Check if an image file was sent in the request
-  if IMAGE_NAME not in request.files:
+def endpoint(request, image=None):
+  if image == None:
+    # Check if an image file was sent in the request
+    if IMAGE_NAME not in request.files:
       return jsonify({"error": "No image provided"}), 400
 
-  image = get_file(IMAGE_NAME, request)
-  image = image.convert("RGB")
+    image = get_file(IMAGE_NAME, request)
+    image = image.convert("RGB")
 
   # Ensure an actual file was uploaded
   if image == None:
@@ -104,10 +105,18 @@ def endpoint(request):
           if camera is not None:
             player_slot = (team_index * TEAM_SIZE) + camera
 
-            return jsonify({
-              "camera": player_slot,
-              "team": team,
-              "player": camera
-            })
+            # Recycle
+            image.close()
 
-  return jsonify(result)
+            return {
+              "camera": {
+                "slot": player_slot,
+                "team": team,
+                "player": camera
+              }
+            }
+
+  # Recycle
+  image.close()
+
+  return result
