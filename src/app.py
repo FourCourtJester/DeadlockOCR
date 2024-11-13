@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from routes.teams_souls import endpoint as teams_souls
 from routes.player_names import endpoint as player_names
-from routes.camera_v2 import endpoint as camera
+from routes.camera_v3 import endpoint as camera
 from routes.spectator import endpoint as spectator
 
 app = Flask(__name__)

@@ -1,9 +1,10 @@
 from datetime import datetime
 from flask import jsonify
-from utils import crop_image_grayscale as crop_image, extract_text_from_image, get_file
+from utils import crop_image_grayscale_and_resize as crop_image, extract_text_from_image, get_file
 
 import cv2
 
+DEBUG = False
 IMAGE_NAME = 'image'
 TEAM_NAMES = ['Amber', 'Sapphire']
 
@@ -15,10 +16,20 @@ SAPPHIRE_SOUL_COORDS = (999, 5, 999 + (1049 - 999), 25)  # (x, y, x2, y2)
 TESSERACT_CONFIG = '--oem 3 --psm 7 -c tessedit_char_whitelist=0123456789k' # psm 7 assumes a single line of text
 
 def debug_save(image, team):
-  timestamp = datetime.now().strftime("%Y%m%d-%H%M%S%f")
-  filename = f"./test/outputs/souls/{timestamp}-{team}.jpg"
+  if DEBUG:
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S%f")
+    filename = f"./test/outputs/souls/{timestamp}-{team}.jpg"
 
-  cv2.imwrite(filename, image)
+    cv2.imwrite(filename, image)
+
+def debug_print(text):
+  if DEBUG:
+    print(text)
+
+def fix_soul_icon(text):
+  if len(text) > 3:
+    return text[1:]
+  return text
 
 def endpoint(request, image=None):
   if image == None:
@@ -40,17 +51,17 @@ def endpoint(request, image=None):
   sapphire_soul_image = crop_image(image, SAPPHIRE_SOUL_COORDS)
   sapphire_souls = extract_text_from_image(sapphire_soul_image, TESSERACT_CONFIG)[:-1]
 
-  # debug_save(amber_soul_image, 'amber')
-  # debug_save(sapphire_soul_image, 'sapphire')
+  debug_save(amber_soul_image, 'amber')
+  debug_save(sapphire_soul_image, 'sapphire')
 
   # Sometimes the souls icon becomes a 6
-  amber_souls = amber_souls if len(amber_souls) < 4 else amber_souls[1:]
-  sapphire_souls = sapphire_souls if len(sapphire_souls) < 4 else sapphire_souls[1:]
+  amber_souls = fix_soul_icon(amber_souls)
+  sapphire_souls = fix_soul_icon(sapphire_souls)
 
   amber_souls_num = int(amber_souls) if amber_souls.isdigit() else None
   sapphire_souls_num = int(sapphire_souls) if sapphire_souls.isdigit() else None
 
-  print(f"Amber: {amber_souls} | Sapph: {sapphire_souls}")
+  debug_print(f"Amber: {amber_souls} | Sapph: {sapphire_souls}")
 
   # Recycle
   image.close()

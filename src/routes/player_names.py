@@ -2,8 +2,6 @@ from flask import jsonify
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from utils import crop_image_grayscale as crop_image, extract_text_from_image, get_file
 
-# import cv2
-
 IMAGE_NAME = 'image'
 TEAM_NAMES = ['Amber', 'Sapphire']
 TEAM_SIZE = 6

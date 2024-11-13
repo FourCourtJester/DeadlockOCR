@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
   libopencv-dev \
   python3-opencv \
   # Install additional utilities
-  git curl wget \
+  git curl wget jq \
   && apt-get clean
 
 # Install Python packages (move to requirements.txt if you want more control)

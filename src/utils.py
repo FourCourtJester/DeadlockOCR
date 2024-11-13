@@ -1,7 +1,7 @@
 from PIL import Image
 
-import numpy
 import cv2
+import numpy
 import pytesseract
 
 def crop_image(image, coords):
@@ -15,6 +15,17 @@ def crop_image(image, coords):
   return cropped_image
 
 def crop_image_grayscale(image, coords):
+  """Crop the image to specific coordinates."""
+  x,y,w,h = coords
+
+  np_image = numpy.array(image)
+
+  cropped_image = np_image[y:h, x:w]
+  grayscale_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2GRAY)
+
+  return grayscale_image
+
+def crop_image_grayscale_and_resize(image, coords):
   """Crop the image to specific coordinates."""
   x,y,w,h = coords
 
