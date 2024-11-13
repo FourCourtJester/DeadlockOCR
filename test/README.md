@@ -151,5 +151,5 @@ curl -X POST http://localhost:5000/deadlock/ocr/camera -F 'image=@test/screensho
 ### Test the aggregate endpoint
 
 ```bash
-curl -X POST http://localhost:5000/deadlock/ocr/spectator -F "image=@test/souls_problematic.jpg" -F "endpoints=camera" -F "endpoints=teams_souls"
+curl -X POST http://localhost:5000/deadlock/ocr/spectator -F "image=@test/souls_problematic.jpg" -F "endpoints=player_names" -F "endpoints=teams_souls"
 ```

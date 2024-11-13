@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from routes.teams_souls import endpoint as teams_souls
 from routes.player_names import endpoint as player_names
-from routes.camera import endpoint as camera
+from routes.camera_v2 import endpoint as camera
 from routes.spectator import endpoint as spectator
 
 app = Flask(__name__)
@@ -50,7 +50,10 @@ def route_camera():
 @app.route('/deadlock/ocr/spectator', methods=['POST'])
 def route_spectator():
   try:
-    return jsonify(endpoint_with_context(spectator, request))
+    result = endpoint_with_context(spectator, request)
+    # print(result)
+
+    return jsonify(result)
 
   except Exception as e:
     return jsonify({'error': str(e)}), 500  # Return the error message

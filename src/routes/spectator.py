@@ -38,11 +38,10 @@ def endpoint(request):
       futures.append(executor.submit(endpoint_with_context, endpoint))
 
     for future in as_completed(futures):
-      try:
-        task = future.result(timeout=0.5)
+      task = future.result()
+
+      if task is not None:
         result.update(task)
-      except Exception as e:
-        print(f"Error occurred while processing the future: {e}")
 
   # Recycle
   image.close()

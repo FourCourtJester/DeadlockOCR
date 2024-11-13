@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from utils import crop_image, get_file
 
 import numpy
-# import cv2
+import cv2
 
 IMAGE_NAME = 'image'
 TEAM_NAMES = ['Amber', 'Sapphire']
@@ -12,25 +12,22 @@ TEAM_SIZE = 6
 GROUP_AMT = 2
 PLAYERS_PER_GROUP = 3
 
-HIGHLIGHT_SUCCESS = 34
-HIGHLIGHT = {
-  "WHITE": [numpy.array([188,175,159]), numpy.array([240,225,202])]
+BOUNDING_BOX = {
+  "HEIGHT": 56,
+  "WIDTH": 79
 }
 
-BOUNDING_BOX = {
-  "HEIGHT": 48,
-  "WIDTH": 85
-}
+EDGE = 4
 
 PLAYERS = {
   TEAM_NAMES[0].upper(): {
-    "START": (312, 0),
-    "DELTAX": BOUNDING_BOX["WIDTH"] + 5,
+    "START": (315, 0),
+    "DELTAX": BOUNDING_BOX["WIDTH"] + 11,
     "DELTAY": 0,
   },
   TEAM_NAMES[1].upper(): {
-    "START": (1052, 0),
-    "DELTAX": BOUNDING_BOX["WIDTH"] + 5,
+    "START": (1055, 0),
+    "DELTAX": BOUNDING_BOX["WIDTH"] + 11,
     "DELTAY": 0,
   }
 }
@@ -43,31 +40,36 @@ def get_coords(team, i):
   # Iterate to get the new bounding box
   x = x0 + (i * PLAYERS[team]["DELTAX"])
 
-  return (x, y, x + BOUNDING_BOX["WIDTH"], y + BOUNDING_BOX["HEIGHT"])
+  return (x - EDGE, y, x + BOUNDING_BOX["WIDTH"] + EDGE, y + BOUNDING_BOX["HEIGHT"])
 
-def detect_color_percentage(image, bounds):
+def detect_color_percentage(image):
     """Returns the results of the percentage of the image being a certain color"""
-    # Convert to Numpy for efficient pixel analysis
-    total_pixels = image.shape[0] * image.shape[1]
+    left_edge = image[:, :EDGE]
+    right_edge = image[:, -EDGE:]
 
-    # Create boolean mask for pixels within the color range
-    mask = numpy.all((image >= bounds[0]) & (image <= bounds[1]), axis=-1)
+    low_white = numpy.array([100, 100, 100])
+    high_white = numpy.array([255, 255, 255])
 
-    # Count the number of pixels that fall within the color range
-    color_pixels = numpy.sum(mask)
+    mask_left = cv2.inRange(left_edge, low_white, high_white)
+    mask_right = cv2.inRange(right_edge, low_white, high_white)
 
-    # Calculate the percentage of pixels within the range
-    percentage = (color_pixels / total_pixels) * 100
-    return percentage
+    left_ratio = numpy.sum(mask_left == 255) / mask_left.size
+    right_ratio = numpy.sum(mask_right == 255) / mask_right.size
+
+    return left_ratio + right_ratio >= 2
 
 def get_camera(image, team, player):
   """Check if this player is the current camera"""
   # Crop to the areas with the player names
   hero_image = crop_image(image, get_coords(team.upper(), player))
+  select_check = detect_color_percentage(hero_image)
+
+  # print(f"{team} {player}: {select_check}")
 
   # Get the player name
-  if detect_color_percentage(hero_image, HIGHLIGHT["WHITE"]) >= HIGHLIGHT_SUCCESS:
+  if select_check:
     return player
+
   return None
 
 def endpoint(request, image=None):
