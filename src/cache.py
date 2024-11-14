@@ -1,4 +1,4 @@
-from utils import crop_image, crop_image_grayscale
+from utils import crop_image, crop_image_grayscale, grayscale
 
 import cv2
 import json
@@ -32,12 +32,14 @@ cache = {
 def team_specific_crop(image, team):
   # Resize, Crop and Grayscale
   icon = cv2.resize(image, (INTENDED_ICON_WIDTH, INTENDED_ICON_HEIGHT))
-  icon = crop_image_grayscale(icon, ICON_CROP[team])
+  icon = crop_image(icon, ICON_CROP[team])
+
+  icon_grayscale = grayscale(icon)
 
   # Generate a content mask
-  _, mask = cv2.threshold(icon, 1, 255, cv2.THRESH_BINARY)
+  _, mask = cv2.threshold(icon_grayscale, 1, 255, cv2.THRESH_BINARY)
 
-  return (icon, mask)
+  return (cv2.cvtColor(icon, cv2.COLOR_RGB2BGR), mask)
 
 # Loop over each hero and preprocess the associated icon
 for hero, icon_name in ALL_HEROES_ICONS.items():
@@ -66,7 +68,7 @@ for hero, icon_name in ALL_HEROES_ICONS.items():
       cache[team][hero] = { "image": icon, "mask": mask }
 
       # DEBUG
-      # cv2.imwrite(f"../test/outputs/camera/{hero}-{team}.jpg", icon)
+      cv2.imwrite(f"../test/outputs/camera/{hero}-{team}.jpg", icon)
   else:
       print(f"Failed to load {icon_path}.")
 
@@ -75,3 +77,13 @@ with open(f"{CACHE}/cache.pkl", "wb") as f:
   pickle.dump(cache, f)
 
 print("Cache generated successfully!")
+
+# Problem Heroes
+# - Warden !!
+# - Mirage !!
+# - Infernus !
+# - Seven !
+# - Kelvin
+# - Dynamo
+# - Bebop
+# - Haze (Amber)

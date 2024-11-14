@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from utils import crop_image, get_file, grayscale
 
 import cv2
+import numpy
 import json
 
 DEBUG = False
@@ -36,7 +37,7 @@ PLAYERS = {
   }
 }
 
-THRESHOLD = .65
+THRESHOLD = .675
 
 with open("./src/api/heroes.json", "r") as json_file:
   ALL_HEROES_ICONS = json.load(json_file)
@@ -56,7 +57,7 @@ def check_hero(image, team, slot, cache, heroes):
         # print(f"{hero_name} on Team {team} in slot {slot} : {max_val}\n")
 
       if max_val >= THRESHOLD:
-        # print(f"{hero_name} on Team {team} in slot {slot} : {max_val}\n")
+        print(f"{hero_name} on Team {team} in slot {slot} : {max_val}\n")
         return slot
 
     except Exception as e:
@@ -93,7 +94,7 @@ def endpoint(request, image=None):
   all_heroes = cache.get(TEAM_NAMES[0]).keys()
   heroes = request.form.getlist("heroes") if len(request.form.getlist("heroes")) else all_heroes
 
-  image = grayscale(image)
+  # image = grayscale(image)
 
   result = {
     "camera": {
