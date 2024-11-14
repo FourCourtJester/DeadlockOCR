@@ -2,8 +2,8 @@ from flask import jsonify
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from utils import crop_image_grayscale as crop_image, extract_text_from_image, get_file
 
-IMAGE_NAME = 'image'
-TEAM_NAMES = ['Amber', 'Sapphire']
+IMAGE_NAME = "image"
+TEAM_NAMES = ["Amber", "Sapphire"]
 TEAM_SIZE = 6
 
 GROUP_AMT = 2
@@ -27,7 +27,7 @@ PLAYERS = {
   }
 }
 
-TESSERACT_CONFIG = '--oem 3 --psm 6 -l eng+fra' # psm 6 can handle multiple lines
+TESSERACT_CONFIG = "--oem 3 --psm 6 -l eng+fra" # psm 6 can handle multiple lines
 
 def get_coords(team, i):
   """Gets the current iterations coordinates"""
@@ -61,7 +61,7 @@ def endpoint(request, image=None):
 
   # Ensure an actual file was uploaded
   if image == None:
-    return jsonify({'error': 'No selected file'}), 400
+    return jsonify({"error": "No selected file"}), 400
 
   result = {
     "players": {
@@ -83,7 +83,7 @@ def endpoint(request, image=None):
           name, player = future.result()["name"], future.result()["player"]
 
           # Save the text
-          result['players'][team.lower()][player] = name.replace('\n', ' ') if name else None
+          result["players"][team.lower()][player] = name.replace("\n", " ") if name else None
 
   # Recycle
   image.close()

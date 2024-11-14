@@ -5,15 +5,15 @@ from utils import crop_image_grayscale_and_resize as crop_image, extract_text_fr
 import cv2
 
 DEBUG = False
-IMAGE_NAME = 'image'
-TEAM_NAMES = ['Amber', 'Sapphire']
+IMAGE_NAME = "image"
+TEAM_NAMES = ["Amber", "Sapphire"]
 
 AMBER_SOUL_COORDS = (870, 5, 870 + (920 - 870), 25)  # Based from 1920x1080
 SAPPHIRE_SOUL_COORDS = (999, 5, 999 + (1049 - 999), 25)  # (x, y, x2, y2)
 
 # Might be able to use this after we train the font
-# TESSERACT_CONFIG = '--psm 7 outputbase digits' # psm 7 assumes a single line of text
-TESSERACT_CONFIG = '--oem 3 --psm 7 -c tessedit_char_whitelist=0123456789k' # psm 7 assumes a single line of text
+# TESSERACT_CONFIG = "--psm 7 outputbase digits" # psm 7 assumes a single line of text
+TESSERACT_CONFIG = "--oem 3 --psm 7 -c tessedit_char_whitelist=0123456789k" # psm 7 assumes a single line of text
 
 def debug_save(image, team):
   if DEBUG:
@@ -42,7 +42,7 @@ def endpoint(request, image=None):
 
   # Ensure an actual file was uploaded
   if image == None:
-    return jsonify({'error': 'No selected file'}), 400
+    return jsonify({"error": "No selected file"}), 400
 
   # Crop to the areas with the soul totals and compute
   amber_soul_image = crop_image(image, AMBER_SOUL_COORDS)
@@ -51,8 +51,8 @@ def endpoint(request, image=None):
   sapphire_soul_image = crop_image(image, SAPPHIRE_SOUL_COORDS)
   sapphire_souls = extract_text_from_image(sapphire_soul_image, TESSERACT_CONFIG)[:-1]
 
-  debug_save(amber_soul_image, 'amber')
-  debug_save(sapphire_soul_image, 'sapphire')
+  debug_save(amber_soul_image, "amber")
+  debug_save(sapphire_soul_image, "sapphire")
 
   # Sometimes the souls icon becomes a 6
   amber_souls = fix_soul_icon(amber_souls)

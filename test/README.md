@@ -153,3 +153,13 @@ curl -X POST http://localhost:5000/deadlock/ocr/camera -F 'image=@test/screensho
 ```bash
 curl -X POST http://localhost:5000/deadlock/ocr/spectator -F "image=@test/souls_problematic.jpg" -F "endpoints=player_names" -F "endpoints=teams_souls"
 ```
+
+### Test new camera endpoint
+
+```bash
+curl -X POST http://localhost:5000/deadlock/ocr/camera -F "image=@test/ivy_highlighted.jpg" -F "heroes=Ivy" -F "heroes=Dynamo" -F "heroes=Vindicta" -F "heroes=Infernus" -F "heroes=Pocket" -F "heroes=Warden"
+
+curl -X POST http://localhost:5000/deadlock/ocr/camera -F "image=@test/dynamo_highlighted.jpg" -F "heroes=Ivy" -F "heroes=Dynamo" -F "heroes=Vindicta" -F "heroes=Infernus" -F "heroes=Pocket" -F "heroes=Warden"
+
+curl -X POST http://localhost:5000/deadlock/ocr/camera -F "image=@test/seven_highlighted.jpg" -F "heroes=Wraith" -F "heroes=Mo & Krill" -F "heroes=Bebop" -F "heroes=Infernus" -F "heroes=Seven" -F "heroes=Yamato"
+```
