@@ -57,7 +57,7 @@ def check_hero(image, team, slot, cache, heroes):
         # print(f"{hero_name} on Team {team} in slot {slot} : {max_val}\n")
 
       if max_val >= THRESHOLD:
-        print(f"{hero_name} on Team {team} in slot {slot} : {max_val}\n")
+        # print(f"{hero_name} on Team {team} in slot {slot} : {max_val}\n")
         return slot
 
     except Exception as e:
