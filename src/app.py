@@ -7,12 +7,15 @@ from routes.player_names import endpoint as player_names
 from routes.camera_v3 import endpoint as camera
 from routes.spectator import endpoint as spectator
 
+import os
 import pickle
 
 app = Flask(__name__)
 executor = ThreadPoolExecutor(max_workers=5)
 
 CORS(app, origins=["http://localhost:3000"])
+
+CACHE_PATH = "./cache/cache.pkl" if os.getenv("FLASK_ENV") == "production" else "./src/cache/cache.pkl"
 
 def endpoint_with_context(func, *args, **kwargs):
   @copy_current_request_context
@@ -25,7 +28,7 @@ def endpoint_with_context(func, *args, **kwargs):
 @app.before_request
 def cache():
   if "cache" not in g:
-    with open("./src/cache/cache.pkl", "rb") as f:
+    with open(CACHE_PATH, "rb") as f:
       g.cache = pickle.load(f)
 
 @app.route("/deadlock/ocr/teams/souls", methods=["POST"])
@@ -64,5 +67,7 @@ def route_spectator():
   except Exception as e:
     return jsonify({"error": str(e)}), 500  # Return the error message
 
-if __name__ == "__main__":
-  app.run(host="0.0.0.0", port=5000)
+# Development server
+if os.getenv('FLASK_ENV') == "development":
+  if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)

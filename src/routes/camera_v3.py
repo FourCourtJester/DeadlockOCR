@@ -3,8 +3,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from utils import crop_image, get_file, grayscale
 
 import cv2
-import numpy
 import json
+import os
 
 DEBUG = False
 
@@ -14,6 +14,7 @@ TEAM_NAMES = ["Amber".upper(), "Sapphire".upper()]
 TEAM_GROUPS = [[0,1,5], [2,4,3]]
 TEAM_SIZE = 6
 
+HERO_API = "./api/heroes.json" if os.getenv("FLASK_ENV") == "production" else "./src/api/heroes.json"
 HERO_BOX = {
   "HEIGHT": 79,
   "WIDTH": 87
@@ -39,7 +40,7 @@ PLAYERS = {
 
 THRESHOLD = .675
 
-with open("./src/api/heroes.json", "r") as json_file:
+with open(HERO_API, "r") as json_file:
   ALL_HEROES_ICONS = json.load(json_file)
 
 def check_hero(image, team, slot, cache, heroes):
