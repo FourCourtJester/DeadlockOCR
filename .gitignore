@@ -164,3 +164,4 @@ cython_debug/
 # Deadlock Caches
 /src/cache
 /src/api/deadlockapi/heroes
+/test/outputs

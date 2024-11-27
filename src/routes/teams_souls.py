@@ -3,17 +3,17 @@ from flask import jsonify
 from utils import crop_image_grayscale_and_resize as crop_image, extract_text_from_image, get_file
 
 import cv2
+import re
 
 DEBUG = False
 IMAGE_NAME = "image"
 TEAM_NAMES = ["Amber", "Sapphire"]
 
-AMBER_SOUL_COORDS = (870, 5, 870 + (920 - 870), 25)  # Based from 1920x1080
-SAPPHIRE_SOUL_COORDS = (999, 5, 999 + (1049 - 999), 25)  # (x, y, x2, y2)
+AMBER_SOUL_COORDS = (882, 5, 882 + (920 - 882), 25)  # Based from 1920x1080
+SAPPHIRE_SOUL_COORDS = (1011, 5, 1011 + (1049 - 1011), 25)  # (x, y, x2, y2)
 
-# Might be able to use this after we train the font
-# TESSERACT_CONFIG = "--psm 7 outputbase digits" # psm 7 assumes a single line of text
-TESSERACT_CONFIG = "--oem 3 --psm 7 -c tessedit_char_whitelist=0123456789k" # psm 7 assumes a single line of text
+TESSERACT_MODEL = "retaildemo-bold"
+TESSERACT_CONFIG = f"--oem 3 --psm 7 -l {TESSERACT_MODEL}" # psm 7 assumes a single line of text
 
 def debug_save(image, team):
   if DEBUG:
@@ -26,10 +26,15 @@ def debug_print(text):
   if DEBUG:
     print(text)
 
-def fix_soul_icon(text):
-  if len(text) > 3:
-    return text[1:]
-  return text
+def fix(team):
+  result = re.search(r"\d+k", team)
+
+  # Regex failed, likely due to Tesseract precision
+  if result is None:
+    return None
+
+  # Regex success, hopefully correct
+  return result.group().strip()
 
 def endpoint(request, image=None):
   if image == None:
@@ -46,22 +51,29 @@ def endpoint(request, image=None):
 
   # Crop to the areas with the soul totals and compute
   amber_soul_image = crop_image(image, AMBER_SOUL_COORDS)
-  amber_souls = extract_text_from_image(amber_soul_image, TESSERACT_CONFIG)[:-1]
+  amber_souls = extract_text_from_image(amber_soul_image, TESSERACT_CONFIG)
 
   sapphire_soul_image = crop_image(image, SAPPHIRE_SOUL_COORDS)
-  sapphire_souls = extract_text_from_image(sapphire_soul_image, TESSERACT_CONFIG)[:-1]
+  sapphire_souls = extract_text_from_image(sapphire_soul_image, TESSERACT_CONFIG)
 
-  debug_save(amber_soul_image, "amber")
-  debug_save(sapphire_soul_image, "sapphire")
+  # debug_print(f"Amber: \"{amber_souls}\" | Sapph: \"{sapphire_souls}\"")
 
-  # Sometimes the souls icon becomes a 6
-  amber_souls = fix_soul_icon(amber_souls)
-  sapphire_souls = fix_soul_icon(sapphire_souls)
+  # debug_save(amber_soul_image, "amber")
+  # debug_save(sapphire_soul_image, "sapphire")
 
-  amber_souls_num = int(amber_souls) if amber_souls.isdigit() else None
-  sapphire_souls_num = int(sapphire_souls) if sapphire_souls.isdigit() else None
+  amber_souls = fix(amber_souls)
+  sapphire_souls = fix(sapphire_souls)
 
-  debug_print(f"Amber: {amber_souls} | Sapph: {sapphire_souls}")
+  debug_print(f"Amber: \"{amber_souls}\" | Sapph: \"{sapphire_souls}\"")
+
+  if amber_souls is None or sapphire_souls is None:
+    return {
+      "souls": {
+        TEAM_NAMES[0].lower(): None,
+        TEAM_NAMES[1].lower(): None,
+        "delta": None
+      }
+    }
 
   # Recycle
   image.close()
@@ -69,8 +81,8 @@ def endpoint(request, image=None):
   # Return the extracted soul totals as JSON
   return {
     "souls": {
-      TEAM_NAMES[0].lower(): amber_souls_num,
-      TEAM_NAMES[1].lower(): sapphire_souls_num,
-      "delta": (0 if amber_souls_num == None else amber_souls_num) - (0 if sapphire_souls_num == None else sapphire_souls_num)
+      TEAM_NAMES[0].lower(): int(amber_souls[:-1]),
+      TEAM_NAMES[1].lower(): int(sapphire_souls[:-1]),
+      "delta": int(amber_souls[:-1]) - int(sapphire_souls[:-1])
     }
   }
